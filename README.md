@@ -1,2 +1,14 @@
 # SIEM-Log-Analyzer-Simulator
-Simple SIEM-style log analyzer built in Node.js for practicing log parsing and event analysis.
+
+Node.js project created to practice SIEM-style log analysis.
+
+Features:
+- Critical event counting
+- Unique IP detection
+- Severity statistics
+- Suspicious event search
+- Basic log analysis
+
+Technologies:
+- JavaScript
+- Node.js
