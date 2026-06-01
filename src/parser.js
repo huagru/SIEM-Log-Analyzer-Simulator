@@ -18,18 +18,38 @@ const logFilePath = path.join(
 );
 
 
-/* Function to parse the log file into an array */
+// Function to parse the log file into an array 
 function parseToArray(filePath) {
     // Read the file contents and store them as a single string.
     const content = fs.readFileSync(filePath, "utf8");
 
-    // Split the file contents into lines. Each line becomes an element in the "records" array.
+    // Split the string into lines. Each line becomes an element in the "records" array.
     const records = content.split("\n");
 
-    console.log(records)
+    return records;
 
 }
 
 
-parseToArray(logFilePath);
+const recordsArray = parseToArray(logFilePath);
 
+
+
+function parseArrayToObject(array) {
+    let events = [];
+
+    for (const record of array) {
+        const match = record.match(/\d+\.\d+\.\d+\.\d+/);
+        
+        if (!match) {
+            continue;
+        }
+        
+        events.push({ ip: match[0] });
+    }
+    
+    console.log(events);
+    return events;
+}
+
+parseArrayToObject(recordsArray);
