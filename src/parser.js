@@ -1,55 +1,33 @@
-// The objective of this parser is to extract IP addresses from Apache log files, to an object.
-// The object then is exported to be used by the analyzer.
 
-
-// Import the Node.js fs module to work with files.
+// Require fs to work with the file system. 
 const fs = require("fs");
 
-// Import the Node.js path module to work with file paths.
+// Require path to work with file and directory paths.
 const path = require("path");
 
-// Define the log file path using the path module.
-const logFilePath = path.join(
-    __dirname,
-    "..",
-    "logs",
-    "log.txt"
-);
-
-
-// Function to parse the log file into an array 
+// Function to read the log file and return its content as an array of each entry in the log.
 function parseToArray(filePath) {
-    // Read the file contents and store them as a single string.
     const content = fs.readFileSync(filePath, "utf8");
-
-    // Split the string into lines. Each line becomes an element in the "records" array.
-    const records = content.split("\n");
-
-    return records;
-
+    return content.split("\n");
 }
 
 
-// Here the function is called to parse the log file into an array. Each element is a line from the log file.
-const recordsArray = parseToArray(logFilePath);
-
-
-// Function to parse the array into an object
+// Function that takes an array of log entries and parses each entry into an object with the relevant information extracted using a regular expression. 
+// The function returns an array of these objects, which represent the structured data from the log file.
 function parseArrayToObject(array) {
-    let events = [];
-    
-    // This regex line separates the different parts of the log entry.
+    const events = [];
+
+    /* This regex rule matches log entries that follow a specific format, extracting the IP address, 
+     timestamp, HTTP method, resource, protocol, status code, bytes sent, and user agent from each log entry. */
     const regex = /APACHE\s+(\d+\.\d+\.\d+\.\d+)\s+-\s+-\s+\[([^\]]+)\]\s+"(\w+)\s+([^"]+?)\s+(HTTP\/[\d.]+)"\s+(\d+)\s+(\d+)\s+"[^"]*"\s+"([^"]*)"/;
 
-
+    // Loop through each log entry and apply the regex to extract the relevant information and push it into the events array.
     for (const record of array) {
         const match = record.match(regex);
+
+        if (!match) continue; // If the log entry doesn't match the expected format, skip it.
         
-        if (!match) {
-            continue;
-        }
-        
-        events.push({ 
+        events.push({
             ip: match[1],
             timestamp: match[2],
             method: match[3],
@@ -58,12 +36,21 @@ function parseArrayToObject(array) {
             status: Number(match[6]),
             bytes: Number(match[7]),
             userAgent: match[8]
-         });
+        });
     }
-    
-    console.log(events);
+
     return events;
 }
 
-parseArrayToObject(recordsArray);
 
+/* Function that combines the previous two functions to read a log file, parse its content into an array of log entries, 
+ and then convert that array into an array of structured objects representing each log entry. 
+ The function takes the file path as an argument and returns the array of parsed log entries as objects.*/
+function parseLogFile(filePath) {
+    const recordsArray = parseToArray(filePath);
+    return parseArrayToObject(recordsArray);
+}
+
+
+// Export the parseLogFile function for use in other modules.
+module.exports = parseLogFile;
